@@ -53,7 +53,7 @@ ggplot(uv_can %>% filter(theta==0)) +
   geom_point(aes(x=r,y=power)) +
   geom_line(aes(x=r,y=fit),linetype='solid') +
   scale_y_continuous(trans='log10') +
-  # scale_x_continuous(trans='log10') +
+  scale_x_continuous(trans='log10') +
   theme_bw() + xlab('distance [cm]') + ylab('power [mu-W / cm^2]')
   
 
@@ -89,6 +89,8 @@ ggplot(uv_can) +
   # scale_x_continuous(trans='log10') +
   scale_color_discrete(name='degrees off axis') + 
   theme_bw() + xlab('distance [cm]') + ylab('power [mu-W / cm^2]')
+ggsave('uv_can_lily_CRUDE_SKETCH.intensity_model.axial_only.png',height=3.5,width=6)
+
 
 # residuals are well-behaved: sd = 6 mu-W/cm2 and none above 20 mu-W (where also disk assumption isn't good enough) 
 sqrt(sum((uv_can$power-uv_can$fit)^2)/nrow(uv_can))
@@ -221,6 +223,20 @@ ggplot(data=cone_field) +
   scale_fill_gradient(name='seconds',trans='log10',na.value='black',high = "#132B43", low = "#56B1F7")+
   ggtitle('time to 1 equivalent air change (68% reduction)')
 ggsave('uv_can_lily_CRUDE_SKETCH.killing_time_1_equiv_air_change.png',height=3.5,width=5)
+
+# log killing time for 50%
+ggplot(data=cone_field) +
+  geom_tile(aes(x=x,y=z,fill=pmin(t_ac_equiv*0.69,100))) +
+  stat_contour2(aes(x=x,y=z,z = t_ac_equiv*0.69, label = stat(level)),
+                color='white',breaks=c(3,10,30,100),skip = 0) +
+  theme_bw() + 
+  coord_equal() +
+  scale_x_continuous(name='position [cm]',expand=c(0,0))+
+  scale_y_continuous(name='height [cm]',expand=c(0,0))+
+  scale_fill_gradient(name='seconds',trans='log10',na.value='black',high = "#132B43", low = "#56B1F7")+
+  ggtitle('time to kill 50%')
+ggsave('uv_can_lily_CRUDE_SKETCH.killing_time_50_percent.png',height=3.5,width=5)
+
 
 # log killing time for 90% reduction
 ggplot(data=cone_field) +
