@@ -175,7 +175,7 @@ cone_field=expand.grid(x=seq(0,50,by=1),z=seq(0,50,by=1))
 cone_field$r = sqrt((cone_field$x-25)^2 + cone_field$z^2)
 cone_field$theta=360/(2*pi)*atan((cone_field$x-25)/(cone_field$z))
 cone_field$theta[cone_field$r==0]=0 # deal with limit at r=0
-cone_field$power = uv_can_model(r=cone_field$r,theta=cone_field$theta,cone_angle=60,power=490) # manufacturer-specified parameters
+cone_field$power = uv_can_model(r=cone_field$r,theta=cone_field$theta,cone_angle=60,power=790)
 
 # linear intensity
 ggplot(data=cone_field) +
