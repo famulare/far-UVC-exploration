@@ -13,6 +13,7 @@ library(metR) # for better contour plots
 # https://twitter.com/joeyfox85/status/1575882708525682688/photo/1
 # NO BLAME ATTACHED TO HIM! I PULLED THIS FROM HIS SKETCH WITHOUT ASKING.
 
+# 3 Oct 2022: updated with newer data from this tweet https://twitter.com/joeyfox85/status/1577071654311989254
 uv_can = data.frame(r=c(0,2,5,10,15,20,30,40,50,
                         10,15,20,30,40,50,
                         10,10,15,15,15,
@@ -23,10 +24,10 @@ uv_can = data.frame(r=c(0,2,5,10,15,20,30,40,50,
                             25,15,22,15,8, # these are - angles, but I'm assuming symmetry
                             20,10,15,10,# these are - angles, but I'm assuming symmetry
                             20,10),# these are - angles, but I'm assuming symmetry
-                    power=c(497,370,185,70,35,21,10,7,4, # mu-W/cm2
-                            39,28,13,4.5,5,3.2,
-                            3,41,6,16,30,
-                            5,15,3.5,6,
+                    power=c(780,510,218,75,37,21,10.7,7,4, # mu-W/cm2
+                            54,37,15,6.1,5,3.2,
+                            3,48,6,10,30,
+                            5,13.5,3.5,5.8,
                             3.5,3.3))
 
 # discretize angles for plotting later
@@ -44,7 +45,7 @@ m <- nls(power ~ p*(1-(1/sqrt(1+(R/(r-r0))^2))),
 summary(m)
 coef(m) # marketed intensity at opening is 490+ https://uv-can.com/products/lily-handheld-personal-far-uv-disinfection-light
         # small and positive r0 looks like overfitting and makes little difference, so I will leave it out later on.
-        # empirical "disk radius" of ~6 cm is much larger than the device face.
+        # empirical "disk radius" of ~5 cm is much larger than the device face.
         # this is a function of the mirror geometry and placement of the light source in it,
         # but we don't know much about those and I'm not about to guess and ray trace.
 uv_can$fit = predict(m,newdata=uv_can)
@@ -77,7 +78,7 @@ m <- nls(power ~ p*(1-(1/sqrt(1+(R/(r))^2))) * cos(theta/(T/2)*pi/2),
 summary(m)
 
 coef(m)
-# note that cone angle fits at 52 degrees. I suspect my angle guesses from the picture are a bit off,
+# note that cone angle fits at 54 degrees. I suspect my angle guesses from the picture are a bit off,
 # and will use 60 degrees in modeling later, after looking at fit.
 
 uv_can$fit = predict(m,newdata=uv_can)
@@ -89,10 +90,14 @@ ggplot(uv_can) +
   # scale_x_continuous(trans='log10') +
   scale_color_discrete(name='degrees off axis') + 
   theme_bw() + xlab('distance [cm]') + ylab('power [mu-W / cm^2]')
-ggsave('uv_can_lily_CRUDE_SKETCH.intensity_model.axial_only.png',height=3.5,width=6)
+ggsave('uv_can_lily_CRUDE_SKETCH.intensity_model.png',height=3.5,width=6)
 
 
 # residuals are well-behaved: sd = 6 mu-W/cm2 and none above 20 mu-W (where also disk assumption isn't good enough) 
+# residuals are bigger in update but still not too too bad.
+#  most of the new error is off-axis. Not sure what to make of that, but 
+#  may be seeing more of the true, not-disk-like field... 
+
 sqrt(sum((uv_can$power-uv_can$fit)^2)/nrow(uv_can))
 ggplot(uv_can) +
   geom_point(aes(x=r,y=power-fit,group=theta_factor,color=theta_factor)) +
@@ -108,7 +113,7 @@ ggsave('uv_can_lily_CRUDE_SKETCH.intensity_model.residuals.png',height=3.5,width
 ###########################################################
 coef(m)
 uv_can_model = function(r,theta,
-                        eff_R=6.2,cone_angle=52,power=500,
+                        eff_R=5,cone_angle=55,power=790,
                         near_field_hack=TRUE){
   disk_r = 1-(r/sqrt(eff_R^2+r^2))
   
